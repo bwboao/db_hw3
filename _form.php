@@ -76,11 +76,11 @@
 
   function delete_account($db, $account_id){
     $sql_find_house="SELECT house.id FROM house WHERE owner_id=$account_id";
-    $rs=$db->query($sql);
+    $rs=$db->query($sql_find_house);
     while($house_id=$rs->fetchObject()){
       delete_house($db,$house_id->id);
     }
-    $sql_delete_account="DELETE FROM people WHERE account='$account'";
+    $sql_delete_account="DELETE FROM people WHERE id='$account_id'";
     $rs=$db->prepare($sql_delete_account);
     $rs->execute();
     $sql_delete_favorite="DELETE FROM favorite WHERE user_id='$account_id'";
