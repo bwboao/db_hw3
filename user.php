@@ -83,7 +83,7 @@
     else{
       $require_order = " ORDER BY id ASC";
     }
-    
+    echo "<br>" . $require . "<br>"; 
     if($require != ""){
       $house_rs = house_show($require, $require_order, $array_for_execute);
     }
@@ -148,7 +148,7 @@
                   <select class="search" name="information[]" multiple="multiple">
 <?php      
                     echo "<option value='10' ", check_post_multiselect('information','10') ,">-none-</option>";
-                    for($i = 0;$i < 10;$i++){
+                    for($i = 1;$i < 11;$i++){
                       $tmp_str = $num_to_info[$i];
                       echo "<option value='$i' ", check_post_multiselect('information',$i) ,">$tmp_str</option>";
                     }

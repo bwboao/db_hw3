@@ -5,8 +5,8 @@
 
 <?php
   include("connect_database.php");
-  $info_to_num = array('laundry facilities' => 0, 'wifi' => 1, 'lockers' => 2, 'kitchen' => 3, 'elevator' => 4, 'no smoking' => 5, 'television' => 6, 'breakfast' => 7, 'toiletries provided' => 8, 'shuttle service' => 9);
-  $num_to_info = array('laundry facilities', 'wifi', 'lockers', 'kitchen', 'elevator', 'no smoking', 'television', 'breakfast', 'toiletries provided', 'shuttle service');
+  $info_to_num = array('laundry facilities' => 4, 'wifi' => 10, 'lockers' => 5, 'kitchen' => 3, 'elevator' => 2, 'no smoking' => 6, 'television' => 8, 'breakfast' => 1, 'toiletries provided' => 9, 'shuttle service' => 7);
+  $num_to_info = array( '','breakfast', 'elevator', 'kitchen','laundry facilities', 'lockers', 'no smoking', 'shuttle service', 'television', 'toiletries provided', 'wifi');
 
 
   if(session_status() == PHP_SESSION_NONE){
