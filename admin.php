@@ -3,14 +3,13 @@
 <?php
   include("connect_database.php");
   include("_form.php");
-  unset_session('login_account');
+  include("_personinfo.php");
 
-  $account_status = check_is_admin($db);
-  if($account_status == 0){//check is_admin
-      print_p_with_div("alert", "Pemission denied, only administrator can use this page.", 2, "member.php");
-  }  
-  else if($account_status == -1){
+  if(!isset($_SESSION['in_use_is_admin'])){
     print_p_with_div("alert", "please login", 2, "index.php");
+  }
+  else if($_SESSION['in_use_is_admin'] == 0){
+    print_p_with_div("alert", "Pemission denied, only administrator can use this page.", 2, "member.php");
   }
   else{
 //delete part start
@@ -23,57 +22,21 @@
 
 //favorite part start
     if(isset($_POST['button_favorite_house'])){
-        $account = $_SESSION['account'];
+        //$account = $_SESSION['account'];
+        $account = $_SESSION['in_use_account'];
         $table = find_account($db, $account);
-        $user_id = $table[5];
         
         $house_id = $_POST['button_favorite_house'];
-        favorite_house($db, $user_id, $house_id);
+        favorite_house($db, $house_id);
         print_p_with_div("notice", "Favorited <3", 1, "admin.php");
     }
 //favorite part end
     
-    $my_account = $_SESSION['account'];//for sql;
-    $table = find_account($db, $my_account);
-?>
-    <div id="welcome">
-      <h1>Welcome to the Adim page!</h1>
-      <div id="transbutton">
-        <p class="margin">
-          <input type="submit" onclick="location.href='admin_favorite.php'" value="我的最愛"></input>
-          <input type="submit" onclick="location.href='admin_house.php'" value="房屋管理"></input>
-          <input type="submit" onclick="location.href='admin_user.php'" value="會員管理"></input>
-        </p>
-      </div>
-    </div>
-<!-- Personinfo part START-->
-    <div id="personinfo">
-      <p>Hello, <?php echo "$table[0]"; ?> ! </p>
-      <table>
-        <tbody>
-          <tr>
-            <th colspan="2">info</th>
-          </tr>
-          <tr>
-            <td>name</td>
-            <td><?php echo "$table[3]"; ?></td>
-          </tr>
-          <tr>
-            <td>email</td>
-            <td><?php echo "$table[4]"; ?></td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p class="margin">
-        <input type="button" onclick="location.href='logout.php'" value="logout"></input>
-      </p>
-    </div>
-<!-- Personinfo part END-->
-<!-- Search part START-->
-<?php
+    //$my_account = $_SESSION['account'];//for sql;
+    //$table = find_account($db, $my_account);
+    
 //search part start
-    $user_id = $table[5];
+    //$user_id = $_SESSION['in_use_id'];
     $num_to_require = array('id', 'name', 'location', 'time');
     $require = "";
     $array_for_execute = array();
@@ -144,14 +107,27 @@
       $require_order = " ORDER BY h.id ASC";
     }
 //order part end
+    
     if(substr($require, 0, 4) === " AND"){
       $require = substr($require, 4);
     }
-    $people_rs = show_house($db, $user_id, $require, $require_info_num, $require_order, $array_for_execute);
+    $people_rs = show_house($db, $require, $require_info_num, $require_order, $array_for_execute);
 //search part end
 ?>
 <!-- Search part END-->
+
 <!-- Table part START-->
+    <div id="welcome">
+      <h1>Welcome to the Adim page!</h1>
+      <div id="transbutton">
+        <p class="margin">
+          <input type="submit" onclick="location.href='admin_favorite.php'" value="我的最愛"></input>
+          <input type="submit" onclick="location.href='admin_house.php'" value="房屋管理"></input>
+          <input type="submit" onclick="location.href='admin_user.php'" value="會員管理"></input>
+        </p>
+      </div>
+    </div>
+
     <div id="table">
       <table>
         <h3>All houses</h3>

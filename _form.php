@@ -43,6 +43,105 @@
       return -1;
     }
   }
+  
+  function check_is_favorite($people_id, $house_id){
+    $rs = favorite_show($people_id, $house_id);
+    $table = $rs->fetchObject();
+    $array = array();
+    if($table == $array){
+      return 0;
+    }
+    else{
+      return 1;
+    }
+  }
+
+//house's action
+
+  function house_show($require, $require_order, $array_for_execute){
+    include("connect_database.php");
+    $sql = "SELECT * FROM house WHERE " . $require . $require_order;
+    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner FROM house AS h LEFT JOIN people AS p ON h.owner_id = p.id LEFT JOIN house_to_location AS h_to_l ON h.id = h_to_l.house_id LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id WHERE " . $require . $require_order;
+    //echo $sql;
+    $rs = $db->prepare($sql);
+    $rs->execute($array_for_execute);
+    return $rs;
+  }
+
+  function house_show_only_order($require_order){
+    include("connect_database.php");
+    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner FROM house AS h LEFT JOIN people AS p ON h.owner_id = p.id LEFT JOIN house_to_location AS h_to_l ON h.id = h_to_l.house_id LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id" . $require_order;
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+  function house_favorite($people_id, $house_id){
+    include("connect_database.php");
+    $sql = "INSERT INTO people_to_house (people_id, house_id) VALUES ($people_id, $house_id)";
+    $db->query($sql); 
+  }
+
+  function house_favorite_cancel($people_id, $house_id){
+    include("connect_database.php");
+    $sql = "DELETE FROM people_to_house WHERE people_id = $people_id AND house_id = $house_id";
+    $db->query($sql);
+  }
+
+  function house_delete($house_id){
+    include("connect_database.php");
+    $sql = "DELETE FROM people_to_house WHERE house_id = $house_id;
+            DELETE FROM house_to_information WHERE house_id = $house_id;
+            DELETE FROM house WHERE id = $house_id";
+    $db->query($sql);
+  }
+
+  function str_house_select_by($condition){
+    switch($condition){
+      case 'id':
+        return "SELECT id FROM house WHERE id = :id";
+      case 'name':
+        return "SELECT id FROM house WHERE name = :name";
+      case 'time':
+        return "SELECT id FROM house WHERE time = :time";
+      case 'location':
+        return "SELECT house_id id FROM house_to_location AS h_to_l LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id WHERE location = :location";
+      case 'owner':
+        return "SELECT h.id id FROM house AS h LEFT JOIN people AS p ON owner_id = p.id where p.name = :owner";
+      default://use for information
+        return "SELECT house_id id FROM house_to_information WHERE information_id IN $condition";
+    }  
+  }
+
+//information's action
+
+  function information_show($house_id){
+    include("connect_database.php");
+    $sql = "SELECT information FROM house_to_information AS h_to_i LEFT JOIN normal_information AS i ON h_to_i.information_id = i.id WHERE h_to_i.house_id = $house_id";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+//favorite's action
+  
+  function favorite_show($people_id, $house_id){
+    include("connect_database.php");
+    $sql = "SELECT * FROM people_to_house WHERE people_id = $people_id AND house_id = $house_id";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   function find_latest($db, $table){
     $sql_find_latest = "SELECT MAX(id) from $table";
@@ -100,8 +199,8 @@
     $db->query($sql_delete_house);
   }
 
-  function favorite_house($db, $user_id, $house_id){
-    $sql_favorite_house="INSERT INTO favorite (id , user_id , favorite_id) VALUES (NULL , $user_id , $house_id)";
+  function favorite_house($db, $house_id){
+    $sql_favorite_house="INSERT INTO favorite (id , user_id , favorite_id) VALUES (NULL, $_SESSION[in_use_id], $house_id)";
     $db->query($sql_favorite_house);
   }
 
@@ -272,8 +371,8 @@
     }
   }
   
-  function show_house($db, $user_id, $require, $require_info_num, $require_order, $array_for_execute){
-    $sql_find_house = "SELECT h.id hid, h.name hname, price, location, time, owner_id, p.name owner, user_id, COUNT(h.id) FROM information AS info LEFT JOIN house AS h ON info.house_id = h.id LEFT JOIN people AS p ON owner_id = p.id LEFT JOIN favorite ON favorite_id = h.id AND user_id = $user_id " ;
+  function show_house($db, $require, $require_info_num, $require_order, $array_for_execute){
+    $sql_find_house = "SELECT h.id hid, h.name hname, price, location, time, owner_id, p.name owner, user_id, COUNT(h.id) FROM information AS info LEFT JOIN house AS h ON info.house_id = h.id LEFT JOIN people AS p ON owner_id = p.id LEFT JOIN favorite ON favorite_id = h.id AND user_id = $_SESSION[in_use_id]" ;
 
     if($require != ""){
       $sql_find_house .= " WHERE " . $require;
@@ -286,3 +385,5 @@
     return $people_rs;
   }
 ?>
+
+

@@ -8,16 +8,16 @@
   unset_session('regist_name');
 
   if(isset($_POST['account'])){
-    store_post_as_session('login_account', 'account');
+    store_post_as_session('try_to_login_account', 'account');
     $account=$_POST['account'];//for sql
     $password=$_POST['password'];
     $hash_password=hash('sha256', $password);
-    $table_who_login = find_account($db, $account);
+    $table_who_login = find_account($db, $account);//for session
 
     $needto_output = array();
     $needto_reinput = 0;
 
-    if($_SESSION['login_account'] == null){
+    if($_SESSION['try_to_login_account'] == null){
       array_push($needto_output, "account can't be null");
       $needto_reinput = 1;
     }
@@ -25,7 +25,7 @@
       array_push($needto_output, "password can't be null");
       $needto_reinput = 1;
     }
-    if($_SESSION['login_account'] != $table_who_login[0]){
+    if($_SESSION['try_to_login_account'] != $table_who_login[0]){
       array_push($needto_output, "account doesn't be exist");
       $needto_reinput = 1;
     }
@@ -42,17 +42,21 @@
       unset($needto_output);
     }
     else{
-      $_SESSION['account'] = $account;
-      $_SESSION['is_admin'] = $table_who_login[2];
-      unset($_SESSION['login_account']);
+      $_SESSION['account'] = $table_who_login[0];//delete it after update
+      $_SESSION['in_use_account'] = $table_who_login[0];
+      $_SESSION['in_use_is_admin'] = $table_who_login[2];
+      $_SESSION['in_use_name'] = $table_who_login[3];
+      $_SESSION['in_use_email'] = $table_who_login[4];
+      $_SESSION['in_use_id'] = $table_who_login[5];
+      unset($_SESSION['try_to_login_account']);
 
-      if($table_who_login[2] == 0){
+      if($_SESSION['in_use_is_admin'] == 0){
         $who = "member";
       }
       else{
         $who = "admin";
       }
-      print_p_with_div("alert", "$who login successed", 1, "$who.php");
+      print_p_with_div("alert", "$who login successed", 1, "user.php");
     }
   }
 ?>
@@ -64,7 +68,7 @@
 
 <body>
   <div>
-    <h1>Welcome to HW2</h1>
+    <h1>Welcome to HW3</h1>
   </div>
   <div id="index" >  
     <h1>Login</h1>
@@ -74,7 +78,7 @@
       <tr>
         <td>account</td>
         <td>
-          <input name="account" type="text" value="<?php print_session('login_account'); ?>">
+          <input name="account" type="text" value="<?php print_session('try_to_login_account'); ?>">
         </td>
       </tr>
       <tr>
