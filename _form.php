@@ -121,6 +121,13 @@
     return $rs;
   }
 
+  function information_show_all(){
+    include("connect_database.php");
+    $sql = "SELECT * FROM normal_information";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
 //favorite's action
   
   function favorite_show($people_id, $house_id){
@@ -362,6 +369,7 @@
       }
     }
   }
+
   function check_post_multiselect($post_name, $value){
     if(isset($_POST[$post_name])){
       foreach($_POST[$post_name] as $post_value)
