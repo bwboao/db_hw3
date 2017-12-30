@@ -5,9 +5,6 @@
 
 <?php
   include("connect_database.php");
-  $info_to_num = array('laundry facilities' => 4, 'wifi' => 10, 'lockers' => 5, 'kitchen' => 3, 'elevator' => 2, 'no smoking' => 6, 'television' => 8, 'breakfast' => 1, 'toiletries provided' => 9, 'shuttle service' => 7);
-  $num_to_info = array( '','breakfast', 'elevator', 'kitchen','laundry facilities', 'lockers', 'no smoking', 'shuttle service', 'television', 'toiletries provided', 'wifi');
-
 
   if(session_status() == PHP_SESSION_NONE){
     session_start();
@@ -117,6 +114,13 @@
   function information_show($house_id){
     include("connect_database.php");
     $sql = "SELECT information FROM house_to_information AS h_to_i LEFT JOIN normal_information AS i ON h_to_i.information_id = i.id WHERE h_to_i.house_id = $house_id";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+  function information_show_all(){
+    include("connect_database.php");
+    $sql = "SELECT * FROM normal_information";
     $rs = $db->query($sql);
     return $rs;
   }
@@ -362,6 +366,7 @@
       }
     }
   }
+
   function check_post_multiselect($post_name, $value){
     if(isset($_POST[$post_name])){
       foreach($_POST[$post_name] as $post_value)

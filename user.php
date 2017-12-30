@@ -47,7 +47,7 @@
       $require .= " AND h.id IN (" . str_house_select_by('owner') . ")";
       $array_for_execute['owner'] = $_POST['owner'];
     }
-    if(isset($_POST['information']) && $_POST['information'][0] != 10){
+    if(isset($_POST['information']) && $_POST['information'][0] != 11){
       $infos = "";
       $info_count = 0;
       foreach($_POST['information'] as $info_id){
@@ -146,11 +146,11 @@
               <td class="adjust">
                 <div id="infoselect" >
                   <select class="search" name="information[]" multiple="multiple">
-<?php      
-                    echo "<option value='10' ", check_post_multiselect('information','10') ,">-none-</option>";
-                    for($i = 1;$i < 11;$i++){
-                      $tmp_str = $num_to_info[$i];
-                      echo "<option value='$i' ", check_post_multiselect('information',$i) ,">$tmp_str</option>";
+                    <option value='11' ", check_post_multiselect('information','11') ,">-none-</option>;
+<?php     
+                    $info_rs = information_show_all();
+                    while($info_table = $info_rs->fetchObject()){
+                      echo "<option value='$info_table->id' ", check_post_multiselect('information',$info_table->id) ,">$info_table->information</option>";
                     }
 ?>
                   </select>
