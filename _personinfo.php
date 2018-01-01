@@ -1,5 +1,5 @@
 <div id="personinfo">
-  <p>Hello, <?php echo "$_SESSION[in_use_account]"; ?> ! </p>
+  <p>Hello, <?php print_session('in_use_account'); ?> ! </p>
   <table>
     <tbody>
       <tr>
@@ -7,11 +7,11 @@
       </tr>
       <tr>
         <td>name</td>
-        <td><?php echo "$_SESSION[in_use_name]"; ?></td>
+        <td><?php print_session('in_use_name'); ?></td>
       </tr>
       <tr>
         <td>email</td>
-        <td><?php echo "$_SESSION[in_use_email]"; ?></td>
+        <td><?php print_session('in_use_email'); ?></td>
       </tr>
     </tbody>
   </table>

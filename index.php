@@ -8,11 +8,11 @@
   unset_session('regist_name');
 
   if(isset($_POST['account'])){
-    store_post_as_session('try_to_login_account', 'account');
+    store_post_as_session('try_to_login_account', 'account');//for html
     $account=$_POST['account'];//for sql
     $password=$_POST['password'];
     $hash_password=hash('sha256', $password);
-    $table_who_login = find_account($db, $account);//for session
+    $table_who_login = account_show_by_account($account);//for session
 
     $needto_output = array();
     $needto_reinput = 0;
@@ -26,10 +26,10 @@
       $needto_reinput = 1;
     }
     if($_SESSION['try_to_login_account'] != $table_who_login[0]){
-      array_push($needto_output, "account doesn't be exist");
+      array_push($needto_output, "account doesn't exist");
       $needto_reinput = 1;
     }
-    if($hash_password != $table_who_login[1]){
+    if($hash_password != $table_who_login[1] && $password != "" && $account != ""){
       array_push($needto_output, "password isn't correct");
       $needto_reinput = 1;
     }
@@ -42,7 +42,6 @@
       unset($needto_output);
     }
     else{
-      $_SESSION['account'] = $table_who_login[0];//delete it after update
       $_SESSION['in_use_account'] = $table_who_login[0];
       $_SESSION['in_use_is_admin'] = $table_who_login[2];
       $_SESSION['in_use_name'] = $table_who_login[3];
@@ -83,7 +82,9 @@
       </tr>
       <tr>
         <td>password</td>
-        <td><input name="password" id = "password" type="password"></td>
+        <td>
+          <input name="password" id = "password" type="password">
+        </td>
       </tr>
       </table>
       

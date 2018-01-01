@@ -6,14 +6,9 @@
 <?php
   include("connect_database.php");
 
-  if(session_status() == PHP_SESSION_NONE){
-    session_start();
-  }
-
-  function make_array(){
-    $array = array(0,0,0,0,0,0,0,0,0,0);
-    return $array;
-  }
+  //if(session_status() == PHP_SESSION_NONE){
+  //  session_start();
+  //}
     
   function unset_session($session_to_delete){
     if(isset($_SESSION[$session_to_delete])){
@@ -25,16 +20,10 @@
     $_SESSION[$session_name] = $_POST[$post_name];
   }
    
-  function check_is_admin($db){
-    if(isset($_SESSION['account'])){
-      $account = $_SESSION['account'];
-      $table = find_account($db, $account);
-      if($table[2] == 1){
-        return 1;
-      }
-      else{
-        return 0;
-      }
+  function check_is_admin(){
+    include("connect_database.php");
+    if(isset($_SESSION['in_use_is_admin'])){
+      return $_SESSION['in_use_is_admin'];
     }
     else{
       return -1;
@@ -53,22 +42,25 @@
     }
   }
 
+  function check_is_account_exist($account){
+    $table = account_show_by_account($account);
+    if($table == array()){
+      return 0;
+    }
+    else{
+      return 1;
+    }
+  }
+
 //house's action
 
   function house_show($require, $require_order, $array_for_execute){
     include("connect_database.php");
     $sql = "SELECT * FROM house WHERE " . $require . $require_order;
-    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner FROM house AS h LEFT JOIN people AS p ON h.owner_id = p.id LEFT JOIN house_to_location AS h_to_l ON h.id = h_to_l.house_id LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id WHERE " . $require . $require_order;
+    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner FROM house AS h LEFT JOIN people AS p ON h.owner_id = p.id LEFT JOIN house_to_location AS h_to_l ON h.id = h_to_l.house_id LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id WHERE " . $require . " " . $require_order;
     //echo $sql;
     $rs = $db->prepare($sql);
     $rs->execute($array_for_execute);
-    return $rs;
-  }
-
-  function house_show_only_order($require_order){
-    include("connect_database.php");
-    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner FROM house AS h LEFT JOIN people AS p ON h.owner_id = p.id LEFT JOIN house_to_location AS h_to_l ON h.id = h_to_l.house_id LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id" . $require_order;
-    $rs = $db->query($sql);
     return $rs;
   }
 
@@ -78,18 +70,37 @@
     $db->query($sql); 
   }
 
-  function house_favorite_cancel($people_id, $house_id){
-    include("connect_database.php");
-    $sql = "DELETE FROM people_to_house WHERE people_id = $people_id AND house_id = $house_id";
-    $db->query($sql);
-  }
-
   function house_delete($house_id){
     include("connect_database.php");
     $sql = "DELETE FROM people_to_house WHERE house_id = $house_id;
             DELETE FROM house_to_information WHERE house_id = $house_id;
             DELETE FROM house WHERE id = $house_id";
     $db->query($sql);
+  }
+
+  function house_update($house_id, $house_name, $house_price, $location_id){
+    include("connect_database.php");
+    $sql = "UPDATE house_to_location SET location_id = $location_id WHERE house_id = $house_id;
+            UPDATE house SET name = :house_name, price = :house_price WHERE id = $house_id";
+    $rs = $db->prepare($sql); 
+    $rs->execute(array('house_name' => $house_name, 'house_price' => $house_price));
+  }
+
+  function house_create($house_name, $house_price, $location_id){
+    include("connect_database.php");
+    $time = date('Y-m-d');
+    $sql = "INSERT INTO house (name, price, time, owner_id) VALUES (:house_name, :house_price, :time, $_SESSION[in_use_id]);";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('house_name' => $house_name, 'house_price' => $house_price, 'time' => $time));
+    
+    $sql = "SELECT MAX(id) FROM house;";
+    $rs = $db->query($sql);
+    $table = $rs->fetch();
+    $house_id = $table[0];
+    
+    $sql = "INSERT INTO house_to_location (house_id, location_id) VALUES ($house_id, $location_id);";
+    $rs = $db->query($sql);
+    return $house_id;
   }
 
   function str_house_select_by($condition){
@@ -104,6 +115,8 @@
         return "SELECT house_id id FROM house_to_location AS h_to_l LEFT JOIN normal_location AS l ON h_to_l.location_id = l.id WHERE location = :location";
       case 'owner':
         return "SELECT h.id id FROM house AS h LEFT JOIN people AS p ON owner_id = p.id where p.name = :owner";
+      case 'favorite':
+        return "SELECT house_id id FROM people_to_house WHERE people_id = :id";
       default://use for information
         return "SELECT house_id id FROM house_to_information WHERE information_id IN $condition";
     }  
@@ -113,7 +126,7 @@
 
   function information_show($house_id){
     include("connect_database.php");
-    $sql = "SELECT information FROM house_to_information AS h_to_i LEFT JOIN normal_information AS i ON h_to_i.information_id = i.id WHERE h_to_i.house_id = $house_id";
+    $sql = "SELECT information_id, information FROM house_to_information AS h_to_i LEFT JOIN normal_information AS i ON h_to_i.information_id = i.id WHERE h_to_i.house_id = $house_id ORDER BY information_id";
     $rs = $db->query($sql);
     return $rs;
   }
@@ -121,6 +134,34 @@
   function information_show_all(){
     include("connect_database.php");
     $sql = "SELECT * FROM normal_information";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+  function information_delete($house_id){
+    include("connect_database.php");
+    $sql = "DELETE FROM house_to_information WHERE house_id = $house_id";
+    $db->query($sql);
+  }
+
+  function information_create($house_id, $information_id){
+    include("connect_database.php");
+    $sql = "INSERT INTO house_to_information (house_id, information_id) VALUES ($house_id, $information_id);";
+    $db->query($sql);
+  }
+
+//location's action
+
+  function location_show($house_id){
+    include("connect_database.php");
+    $sql = "SELECT * FROM house_to_location WHERE house_id = $house_id";
+    $rs = $db->query($sql);
+    return $rs;
+  }
+
+  function location_show_all(){
+    include("connect_database.php");
+    $sql = "SELECT * FROM normal_location";
     $rs = $db->query($sql);
     return $rs;
   }
@@ -134,156 +175,70 @@
     return $rs;
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  function find_latest($db, $table){
-    $sql_find_latest = "SELECT MAX(id) from $table";
-    $latest_id = $db->query($sql_find_latest);
-    $table = $latest_id->fetch();
-    return $table[0];
-  }
-
-  function find_account($db, $account){
-    $sql_find_account = "SELECT * FROM people WHERE account=:account";
-    $rs = $db->prepare($sql_find_account);
-    $rs->execute(array('account' => $account));
-    $table = $rs->fetch();
-    return $table;
-  }
-
-  function find_account_using($db){
-    $account = $_SESSION['account'];
-    $sql_find_account = "SELECT * FROM people WHERE account=:account";
-    $rs = $db->prepare($sql_find_account);
-    $rs->execute(array('account' => $account));
-    $table = $rs->fetch();
-    return $table;
-  }
-
-  function insert_account($db, $account, $hash_password, $is_admin, $name, $email){ 
-    $sql_insert_account="INSERT INTO people (account, password, is_admin, name, email) VALUES (:account, :hash_password, :is_admin, :name, :email)";
-    $rs=$db->prepare($sql_insert_account);
-    $rs->execute(array('account' => $account, 'hash_password' => $hash_password, 'is_admin' => $is_admin, 'name' => $name, 'email' => $email));
-  }
-
-  function delete_account($db, $account_id){
-    $sql_find_house="SELECT house.id FROM house WHERE owner_id=$account_id";
-    $rs=$db->query($sql_find_house);
-    while($house_id=$rs->fetchObject()){
-      delete_house($db,$house_id->id);
-    }
-    $sql_delete_account="DELETE FROM people WHERE id='$account_id'";
-    $rs=$db->prepare($sql_delete_account);
-    $rs->execute();
-    $sql_delete_favorite="DELETE FROM favorite WHERE user_id='$account_id'";
-    $db->query($sql_delete_favorite);
-  }
-
-  function find_house($db, $house_id){
-    $sql_find_house = "SELECT * FROM house WHERE id=:house_id";
-    $rs = $db->prepare($sql_find_house);
-    $rs->execute(array('house_id' => $house_id));
-    $table = $rs->fetch();
-    return $table;
-  }
-
-  function delete_house($db, $house_id){
-    $sql_delete_house="DELETE FROM house WHERE id = $house_id;DELETE FROM favorite WHERE favorite_id = $house_id;DELETE FROM information WHERE house_id = $house_id";
-    $db->query($sql_delete_house);
-  }
-
-  function favorite_house($db, $house_id){
-    $sql_favorite_house="INSERT INTO favorite (id , user_id , favorite_id) VALUES (NULL, $_SESSION[in_use_id], $house_id)";
-    $db->query($sql_favorite_house);
-  }
-
-  function check_favorite_house($db, $user_id, $house_id){
-    $sql_favorite_house="SELECT * FROM favorite WHERE user_id = $user_id AND favorite_id = $house_id";
-    $rs = $db->query($sql_favorite_house);
-    if($rs == NULL){
-      return 0;
-    }
-    else{
-      return 1;
-    }
-  }
-
-  function show_house_all($db, $user_id){
-    //$sql_find_house_all = "SELECT h.id hid, h.name hname, price, location, time, owner_id, p.name owner FROM house as h LEFT JOIN people AS p ON owner_id = p.id";
-    $sql_find_house_all = "SELECT *,house.id hid,house.name hname, people.name AS owner  FROM  `house` LEFT JOIN people ON owner_id = people.id LEFT JOIN favorite ON favorite_id = house.id AND user_id = $user_id GROUP BY house.id ORDER BY house.id ASC" ;
-    $rs = $db->query($sql_find_house_all);
-    return $rs;
-  }
-
-  function show_house_my($db, $user_id){
-    $sql_find_house_my = "SELECT h.id hid, h.name hname, price, location, time, owner_id, p.name owner FROM house as h LEFT JOIN people AS p ON owner_id = p.id WHERE owner_id = $user_id";
-    $rs = $db->query($sql_find_house_my); 
-    return $rs;
-  }
-
-  function show_info_array($db, $house_id, $info_to_num){
-    $sql_find_info_all = "SELECT * FROM information WHERE house_id = $house_id";
-    $rs = $db->query($sql_find_info_all);
-    $values = make_array();
-    if($rs == NULL){
-      return $values;
-    }
-    while($info = $rs->fetchObject()){
-      $values[$info_to_num[$info->information]] = 1;
-    }
-    return $values;
-  }
-
-
-  function update_house($db, $update_id, $update_name, $update_price, $update_location){
-    $sql_update_house = "UPDATE house SET name = :update_name, price = :update_price, location = :update_location WHERE id = :update_id";
-    $rs = $db->prepare($sql_update_house);
-    $rs->execute(array('update_name' => $update_name, 'update_price' => $update_price, 'update_location' => $update_location, 'update_id' => $update_id));
-  }
-
-  function create_house($db, $owner_id, $create_name, $create_price, $create_location){
-    $time = date('Y-m-d');
-    $sql_create_house = "INSERT INTO house (id, name, price, location, time, owner_id) VALUES (NULL, :create_name, :create_price, :create_location, :time, :owner_id)";
-    $rs = $db->prepare($sql_create_house);
-    $rs->execute(array('create_name' => $create_name, 'create_price' => $create_price, 'create_location' => $create_location, 'time' => $time, 'owner_id' => $owner_id)); 
-  }
-
-  function delete_info($db ,$house_id, $info){
-    $sql_delete_info = "DELETE FROM information WHERE house_id = $house_id AND information = '$info'";
-    //$sql_delete_info = "DELETE FROM information WHERE house_id = $house_id AND information = \"$info\"";
-    $db->query($sql_delete_info);
+  function favorite_delete($people_id, $house_id){
+    include("connect_database.php");
+    $sql = "DELETE FROM people_to_house WHERE people_id = $people_id AND house_id = $house_id";
+    $db->query($sql);
   }
   
-  function create_info($db ,$house_id, $info){
-    $sql_create_info = "INSERT INTO information (id, house_id, information) VALUES (NULL, $house_id, '$info')";
-    $db->query($sql_create_info);
- }
+//account's action
 
-  function update_info($db, $update_id, $values, $num_to_info, $info_to_num){
-    $array = show_info_array($db, $update_id, $info_to_num);
-    for($i = 0;$i < 10;$i++){
-      if($values[$i] != $array[$i]){
-        $tmp_str = $num_to_info[$i];
-        if($values[$i] == 1){
-          create_info($db, $update_id, $tmp_str);
-        }
-        else{
-          delete_info($db ,$update_id, $tmp_str);
-        }
-      }
-    }   
+  function account_show_all(){
+    include("connect_database.php");
+    $sql = "SELECT * FROM people";
+    $rs = $db->query($sql);
+    return $rs;
   }
+
+  function account_show_by_account($account){
+    include("connect_database.php");
+    $sql = "SELECT * FROM people WHERE account = :account";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('account' => $account));
+    $table = $rs->fetch();
+    return $table;
+  }
+
+  function account_show_by_id($id){
+    include("connect_database.php");
+    $sql = "SELECT * FROM people WHERE id = $id";
+    $rs = $db->query($sql);
+    $table = $rs->fetch();
+    return $table;
+  }
+
+  function account_create($account, $password,  $is_admin, $name, $email){
+    include("connect_database.php");
+    $hash_password = hash('sha256', $password);
+    $sql = "INSERT INTO people (account, password, is_admin, name, email) VALUES (:account, :hash_password, :is_admin, :name, :email)";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('account' => $account, 'hash_password' => $hash_password, 'is_admin' => $is_admin, 'name' => $name, 'email' => $email)); 
+  }
+
+  function account_delete($id){
+    include("connect_database.php");
+    $sql = "DELETE FROM people WHERE id = $id;
+            DELETE FROM house_to_location WHERE house_id IN (SELECT id house_id FROM house WHERE owner_id = $id);
+            DELETE FROM house_to_information WHERE house_id IN (SELECT id house_id FROM house WHERE owner_id = $id);
+            DELETE FROM house WHERE owner_id = $id;
+            DELETE FROM people_to_house WHERE people_id = $id";
+    $db->query($sql); 
+  }
+
+  function account_change($id){
+    include("connect_database.php");
+    $table = account_show_by_id($id);
+    if($table[2] == 1){
+      $new_is_admin = 0;
+    }
+    else{
+      $new_is_admin = 1;
+    }
+    $sql = "UPDATE people SET is_admin = $new_is_admin WHERE id = $id";
+    $db->query($sql);
+  }
+
+//print something
 
   function button_with_form($post_to, $name, $value, $button_name){
     echo "<form method='post' action=$post_to>";
@@ -291,16 +246,12 @@
     echo "<input class='adjust' value=$button_name type='submit'>";
     echo "</form>";
   }
-
-  function print_info($db, $house_id, $info_to_num, $num_to_info){
-    $array = show_info_array($db, $house_id, $info_to_num);
-    for($i = 0;$i < 10;$i++){
-      if($array[$i] == 1){
-        echo "<p>";
-        echo $num_to_info[$i];
-        echo "</p>";
-      }
-    }
+  
+  function button_with_form_disabled($post_to, $name, $value, $button_name){
+    echo "<form method='post' action=$post_to>";
+    echo "<input type='hidden' name=$name value='$value' disabled>";
+    echo "<input class='adjust' value=$button_name type='submit' disabled>";
+    echo "</form>";
   }
 
   function print_session($session_name){
@@ -332,25 +283,51 @@
     echo "</div>";
   }
 
-  function print_information_checkbox($values, $num_to_info){
+  function print_information_checkbox(){
+    $rs = information_show_all();
+    if(isset($_SESSION['try_to_change_house_id'])){
+      $house_informations = information_show($_SESSION['try_to_change_house_id']);
+    }
+    if(isset($house_informations)){
+      $table_house_information = $house_informations->fetchObject();
+    }
+    $i = 0;
     echo "<div class=\"nobackground\">";
-    for($i = 0 ; $i < 10 ; $i++){
+    while($table = $rs->fetchObject()){
+      if(isset($table_house_information) && $table_house_information != array() && $table->id == $table_house_information->information_id){
+        echo "<input type = 'checkbox' name = $table->id checked>$table->information</input>";
+        $table_house_information = $house_informations->fetchObject();
+      } 
+      else{
+        echo "<input type = 'checkbox' name = $table->id>$table->information</input>";
+      }
+      $i += 1;
       if($i == 4 || $i == 8){
         echo "<br>";
       }
-      $tmp_str = $num_to_info[$i];
-      echo "<input type = 'checkbox' name = \"$i\"";
-      if($values[$i] == 1){
-        echo " checked>";
-      }
-      else{
-        echo ">";
-      }
-      echo $tmp_str;
-      echo "</input>";
     }
     echo "</div>";
   }
+
+  function print_location_selection(){
+    if(isset($_SESSION['try_to_change_house_id'])){
+      $house_location_rs = location_show($_SESSION['try_to_change_house_id']);
+      $table_house_location = $house_location_rs->fetchObject();
+      $house_location_id = $table_house_location->location_id;
+    }
+    $rs = location_show_all();
+    echo "<select class = 'search' name = 'location' placeholder = 'keywords'>";
+    while($table = $rs->fetchObject()){
+      echo "<option value=$table->id";
+      if(isset($house_location_id) && $house_location_id == $table->id){
+        echo " selected = 'true'";
+      }
+      echo ">$table->location</option>";
+    }  
+    echo "</select>";
+  }
+
+//bwboao's function
 
   function check_post_value($post_name){
     if(isset($_POST[$post_name])){
@@ -374,20 +351,6 @@
         echo " selected = \"true\" ";
       }
     }
-  }
-  
-  function show_house($db, $require, $require_info_num, $require_order, $array_for_execute){
-    $sql_find_house = "SELECT h.id hid, h.name hname, price, location, time, owner_id, p.name owner, user_id, COUNT(h.id) FROM information AS info LEFT JOIN house AS h ON info.house_id = h.id LEFT JOIN people AS p ON owner_id = p.id LEFT JOIN favorite ON favorite_id = h.id AND user_id = $_SESSION[in_use_id]" ;
-
-    if($require != ""){
-      $sql_find_house .= " WHERE " . $require;
-    }
-    $sql_find_house .= " GROUP BY h.id HAVING COUNT(h.id) >= $require_info_num" . $require_order;
-    //echo "<div><p>$sql_find_house</p></div>";
-    $people_rs = $db->prepare($sql_find_house);
-    //print_r($array_for_execute);
-    $people_rs->execute($array_for_execute);       
-    return $people_rs;
   }
 ?>
 

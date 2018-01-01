@@ -5,12 +5,9 @@
   include("_form.php");
   include("_personinfo.php");
 
-  if(!isset($_SESSION['in_use_is_admin'])){
+  if(check_is_admin() == -1){
     print_p_with_div("alert", "please login", 2, "index.php");
   }
-  //else if($_SESSION['in_use_is_admin'] == 0){
-  //  print_p_with_div("alert", "Pemission denied, only administrator can use this page.", 2, "member.php");
-  //}
   else{
     //delete part
     if(isset($_POST['delete_house_by_button'])){
@@ -75,20 +72,19 @@
     }
     $require = substr($require, 4);
     if(isset($_POST['price_search'])){
-      $require_order = " ORDER BY price $_POST[price_search]";
+      $require_order = "ORDER BY price $_POST[price_search]";
     }
     else if(isset($_POST['time_search'])){
-      $require_order = " ORDER BY time $_POST[time_search]";
+      $require_order = "ORDER BY time $_POST[time_search]";
     }
     else{
-      $require_order = " ORDER BY id ASC";
+      $require_order = "ORDER BY h.id ASC";
     }
-    echo "<br>" . $require . "<br>"; 
     if($require != ""){
       $house_rs = house_show($require, $require_order, $array_for_execute);
     }
     else{
-      $house_rs = house_show_only_order($require_order);
+      $house_rs = house_show("1", $require_order, array());
     }
 ?>
 <!-- Table part START-->
@@ -96,12 +92,12 @@
       <h1>Welcome to the <?php if($_SESSION['in_use_is_admin'] == 1){echo "Admin";}else{echo "Member";}?> page!</h1>
       <div id="transbutton">
         <p class="margin">
-          <input type="submit" onclick="location.href='user_favorite.php'" value="我的最愛"></input>
-          <input type="submit" onclick="location.href='user_house.php'" value="房屋管理"></input>
+          <input type="submit" onclick="location.href='user_favorites.php'" value="我的最愛"></input>
+          <input type="submit" onclick="location.href='user_houses.php'" value="房屋管理"></input>
 <?php
           if($_SESSION['in_use_is_admin'] == 1){
 ?>
-          <input type="submit" onclick="location.href='user_user.php'" value="會員管理"></input>
+          <input type="submit" onclick="location.href='admin_users.php'" value="會員管理"></input>
 <?php
           }
 ?>
@@ -224,20 +220,17 @@
  ?>
             </td>
             <td class="adjust">
-              <form method="post" action="user.php">
-                <input type="hidden" name="favorite_house_by_button" value="<?php echo $table->id; ?>" <?php if($is_favorite == 1){ echo "disabled"; } ?>>
-                <input class="adjust" value="<?php if($is_favorite == 1) {echo "已在我的最愛內";}else{echo "favorite";} ?>" type="submit" <?php if($table->user_id != NULL) {echo "disabled";} ?> >
-              </form>
 <?php
-              if($_SESSION['in_use_is_admin'] == 1){
+            if($is_favorite == 0){
+              button_with_form("user.php", "favorite_house_by_button", $table->id, "favorite");
+            }
+            else{
+              button_with_form_disabled("user.php", "favorite_house_by_button", $table->id, "已在我的最愛內");
+            }
+            if($_SESSION['in_use_is_admin'] == 1){
+              button_with_form("user.php", "delete_house_by_button", $table->id, "delete"); 
+            }
 ?>  
-              <form method="post" action="user.php">
-                <input type="hidden" name="delete_house_by_button" value="<?php echo $table->id; ?>">
-                <input class="adjust" value="delete" type="submit">
-              </form>
-<?php
-              }
- ?>  
             </td>
           </tr>
 <?php
