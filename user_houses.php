@@ -9,6 +9,7 @@
   unset_session('try_to_change_house_name');
   unset_session('try_to_change_house_price');
   unset_session('try_to_change_house_location');
+  unset_session("require_order");
   
   if(check_is_admin() == -1){
     print_p_with_div("alert", "Please login", 2, "index.php");

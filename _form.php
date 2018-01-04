@@ -351,6 +351,30 @@
 
 //bwboao's function
 
+  function print_pagination($rows){
+    if(isset($_POST['page_num']))
+      $page_num = $_POST['page_num'];
+    else
+      $page_num = 1;
+    echo "<button type='submit' form='searchform' class='page' name='page_num' value=" . prev_page($page_num) . ">prev</button> ";
+    for($i=1;$i<=$rows;$i++)
+      if($i == $page_num)
+        echo "<button type='submit' form='searchform' class='page active' name='page_num' value='$i'> $i </button>";
+      else
+        echo "<button type='submit' form='searchform' class='page' name='page_num' value='$i'> $i </button>";
+    echo "<button type='submit' form='searchform' class='page' name='page_num' value=" . next_page($page_num,$rows) . ">next</button> ";
+    return $page_num;
+  }
+    function prev_page($page_num){
+      if($page_num>1)
+        $page_num--;
+      return $page_num;
+  }
+  function next_page($page_num,$rows){
+    if($page_num<$rows)
+      $page_num++;
+    return $page_num;
+  }
   function check_post_value($post_name){
     if(isset($_POST[$post_name])){
       $temp = $_POST[$post_name];

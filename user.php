@@ -98,22 +98,22 @@
     }
     $require = substr($require, 4);
     if(isset($_POST['price_search'])){
-      $require_order = "ORDER BY price $_POST[price_search]";
+      $_SESSION['require_order'] = "ORDER BY price $_POST[price_search]";
     }
     else if(isset($_POST['time_search'])){
-      $require_order = "ORDER BY time $_POST[time_search]";
+      $_SESSION['require_order'] = "ORDER BY time $_POST[time_search]";
     }
-    else{
-      $require_order = "ORDER BY h.id ASC";
+    else if(!isset($_SESSION['require_order'])){
+      $_SESSION['require_order'] = "ORDER BY h.id ASC";
     }
     if($require != ""){
-      $house_rs = house_show($require, $require_order, $array_for_execute);
+      $house_rs = house_show($require, $_SESSION['require_order'], $array_for_execute);
     }
     else{
-      $house_rs = house_show("1", $require_order, array());
+      $house_rs = house_show("1", $_SESSION['require_order'], array());
     }
 ?>
-<!-- Table part START-->
+<!-- Welcome part START-->
     <div id="welcome">
       <h1>Welcome to the <?php if($_SESSION['in_use_is_admin'] == 1){echo "Admin";}else{echo "Member";}?> page!</h1>
       <div id="transbutton">
@@ -131,9 +131,20 @@
         </p>
       </div>
     </div>
+<!-- Welcome part END-->
+<!-- Table part START-->
     <div id="table">
-      <table>
         <h3>All houses</h3>
+<!--Pagination-->
+    <div class="nobackground page">
+<?php
+  $rows=$house_rs->rowCount();
+  $rows=ceil($rows/5);
+  $page_num=print_pagination($rows);
+?>
+  </div>
+<!--Pagination-->
+      <table>
         <tbody>
           <tr>
             <td class="adjust" colspan="8">
@@ -238,7 +249,11 @@
           </tr>
 <?php
           $has_house = 0;
-          while($table = $house_rs->fetchObject()){
+          if($page_num>1)
+            for($i=0;$i < ($page_num-1)*5;$i++)
+              $table = $house_rs->fetchObject();
+          for($i=0;$i<5;$i++)
+          if($table = $house_rs->fetchObject()){
           if(check_is_favorite($_SESSION['in_use_id'], $table->id) == 1){
             $is_favorite = 1;
           }

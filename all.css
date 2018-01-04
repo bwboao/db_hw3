@@ -162,8 +162,19 @@ button.svgbutton{
   background:transparent;
   border:none;
 }
-
-
+button.page{
+  padding:0.35em 1em;
+  background:transparent;
+  border:none;
+  border-radius:0.2em;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.5)
+}
+button.page:hover:not(.active){
+  background-color:rgba(0,100,150,0.1);
+}
+button.active{
+  background-color:rgba(198,243,203,0.7);
+}
 /*the divs and a p and h1*/
 
 div>p{
@@ -280,4 +291,8 @@ div#infoselect{
 div.nobackground{
   background:transparent;
 }
+div.page{
+  padding:0;
+}
+
 }
