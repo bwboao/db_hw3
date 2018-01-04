@@ -19,8 +19,8 @@
       house_delete($_POST['delete_house_by_button']);
       print_p_with_div("notice", "Delete success", 1, "user_houses.php");
     }
-    $require = "owner_id = $_SESSION[in_use_id]"; 
-    $house_rs = house_show($require, "", array());
+    $require = "h.id IN (" . str_house_select_by("owner") . ")"; 
+    $house_rs = order_show($require, "", array('owner' => $_SESSION['in_use_name']));
 ?>
     <div id="welcome">
       <h1>Welcome to your house manage page!</h1>
@@ -50,8 +50,9 @@
           <th>name</th>
           <th>price</th>
           <th>location</th>
-          <th>time</th>
-          <th>owner</th>
+          <th>time_check_in</th>
+          <th>time_check_out</th>
+          <th>visitor</th>
           <th>information</th>
           <th>option</th>
         </tr>
@@ -63,8 +64,16 @@
           <td><?php echo $table->name; ?></td>
           <td><?php echo $table->price; ?></td>
           <td><?php echo $table->location; ?></td>
-          <td><?php echo $table->time; ?></td>
-          <td><?php echo $table->owner; ?></td>
+          <td><?php echo $table->time_check_in; ?></td>
+          <td><?php echo $table->time_check_out; ?></td>
+          <td>
+<?php
+          if($table->customer_id != ""){
+            $customer = account_show_by_id($table->customer_id);
+            echo $customer['name'];
+          }
+?>
+          </td>
           <td>
 <?php
           $info_rs = information_show($table->id);

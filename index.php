@@ -6,6 +6,7 @@
   
   unset_session('regist_account');
   unset_session('regist_name');
+  unset_session('regist_email');
 
   if(isset($_POST['account'])){
     store_post_as_session('try_to_login_account', 'account');//for html

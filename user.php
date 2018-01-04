@@ -21,6 +21,12 @@
       print_p_with_div("notice", "Favorited <3", 1, "user.php");
     }
 
+    //book part
+    if(isset($_POST['book_house_by_button'])){
+      house_book($_SESSION['in_use_id'], $_POST['book_house_by_button'], $_SESSION['time_check_in'], $_SESSION['time_check_out']);
+      print_p_with_div("notice", "Book success!", 1, "user.php");
+    }
+
     //search part start
     $require = "";
     $array_for_execute = array();
@@ -36,9 +42,29 @@
       $require .= " AND h.id IN (" . str_house_select_by('location') . ")";
       $array_for_execute['location'] = $_POST['location'];
     }
-    if(!empty($_POST['time'])){
-      $require .= " AND h.id IN (" . str_house_select_by('time') . ")";
-      $array_for_execute['time'] = $_POST['time'];
+    if(!empty($_POST['time_check_in']) && !empty($_POST['time_check_out'])){
+      store_post_as_session('time_check_in', 'time_check_in');
+      store_post_as_session('time_check_out', 'time_check_out');
+      if($_SESSION['time_check_in'] >= $_SESSION['time_check_out']){
+        $require .= " AND 0 = 1";
+      }
+      else{
+        $require .= " AND h.id NOT IN (" . str_house_select_by('time') . ")";
+        $array_for_execute['time_check_in'] = $_POST['time_check_in'];
+        $array_for_execute['time_check_out'] = $_POST['time_check_out']; 
+      }
+    }
+    else if(!empty($_POST['time_check_in'])){
+      store_post_as_session('time_check_in', 'time_check_in');
+      unset_session('time_check_out');
+    }
+    else if(!empty($_POST['time_check_out'])){
+      store_post_as_session('time_check_out', 'time_check_out');
+      unset_session('time_check_in');
+    }
+    else{
+      unset_session('time_check_out');
+      unset_session('time_check_in');
     }
     if(!empty($_POST['owner'])){
       $require .= " AND h.id IN (" . str_house_select_by('owner') . ")";
@@ -93,7 +119,8 @@
       <div id="transbutton">
         <p class="margin">
           <input type="submit" onclick="location.href='user_favorites.php'" value="我的最愛"></input>
-          <input type="submit" onclick="location.href='user_houses.php'" value="房屋管理"></input>
+          <input type="submit" onclick="location.href='user_houses.php'" value="我的房屋"></input>
+          <input type="submit" onclick="location.href='user_orders.php'" value="我的訂房"></input>
 <?php
           if($_SESSION['in_use_is_admin'] == 1){
 ?>
@@ -112,7 +139,17 @@
             <td class="adjust" colspan="8">
               <p style="text-align:end;font-size:10px;">*info:use ctrl + mouse to multi-check the information</p>
             </td>
-          </tr>      
+          </tr>
+          <tr>
+            <td>id_keyword</td>
+            <td>name_keyword</td>
+            <td>price_keyword</td>
+            <td>location_keyword</td>
+            <td>time_check_in</td>
+            <td>time_check_out</td>
+            <td>owner_keyword</td>
+            <td>information_selections</td>
+          </tr>   
           <tr>          
             <form method="post" action="user.php" id="searchform">
               <td class="adjust">
@@ -134,8 +171,12 @@
                 <input class="search" name="location" type="text" placeholder="keywords"<?php check_post_value("location"); ?>>
               </td>
               <td class="adjust">
-                <input class="search" name="time" type="date" placeholder="date"<?php check_post_value("time"); ?>>
+                <input class="search" name="time_check_in" type="date" placeholder="date"<?php check_post_value("time_check_in"); ?>>
               </td>
+              <td class="adjust">
+                <input class="search" name="time_check_out" type="date" placeholder="date"<?php check_post_value("time_check_out"); ?>>
+              </td>
+
               <td class="adjust">
                 <input class="search" name="owner" type="text" placeholder="keywords"<?php check_post_value("owner"); ?>>
               </td>
@@ -178,7 +219,7 @@
               </button>
             </th>
             <th>location</th>
-            <th>
+            <th colspan='2'>
               <button type="submit" form="searchform" class="svgbutton" name="time_search" value="ASC">
                 <svg height="10" width="10">
                   <polygon points="5,0 0,10 10,10" style="fill:rgba(50,0,255,0.5)" />
@@ -196,6 +237,7 @@
             <th>option</th>
           </tr>
 <?php
+          $has_house = 0;
           while($table = $house_rs->fetchObject()){
           if(check_is_favorite($_SESSION['in_use_id'], $table->id) == 1){
             $is_favorite = 1;
@@ -203,13 +245,14 @@
           else{
             $is_favorite = 0;
           }
+          $has_house = 1;
 ?>
           <tr>
             <td><?php echo $table->id; ?></td>
             <td><?php echo $table->name; ?></td>
             <td><?php echo $table->price; ?></td>
             <td><?php echo $table->location; ?></td>
-            <td><?php echo $table->time; ?></td>
+            <td colspan='2'><?php echo $table->time; ?></td>
             <td><?php echo $table->owner; ?></td>
             <td>
 <?php
@@ -230,15 +273,31 @@
             if($_SESSION['in_use_is_admin'] == 1){
               button_with_form("user.php", "delete_house_by_button", $table->id, "delete"); 
             }
+            if($table->owner_id == $_SESSION['in_use_id']){
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "my_house");
+            }
+            else if(isset($_SESSION['time_check_out']) && isset($_SESSION['time_check_in'])){
+              button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
+            }
+            else if(isset($_SESSION['time_check_in'])){
+              button_with_form("user.php", "book_house_by_button", $table->id, "set_time_check_out");
+            }
+            else{
+              button_with_form("user.php", "book_house_by_button", $table->id, "set_time_check_in");
+            }
 ?>  
             </td>
           </tr>
 <?php
-          }
+          }//while(fetchObject())
 ?>
-
         </tbody>
       </table>
+<?php
+      if($has_house == 0){
+        print_p("notice", "check_in_time must smaller than chekc_out_time");
+      }
+?>
     </div>
 <!-- Table part END -->
 <?php
