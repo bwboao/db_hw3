@@ -25,24 +25,45 @@
       store_post_as_session('try_to_change_house_name', 'house_name');
       store_post_as_session('try_to_change_house_price', 'price');
       store_post_as_session('try_to_change_house_location', 'location');
-      if($_SESSION['is_try_to_update'] == '1'){
+
+      $needto_reinput = 0;
+      $needto_output = array();
+
+      if($_SESSION['try_to_change_house_name'] == ""){
+        array_push($needto_output, "house_name can't be null");
+        $needto_reinput = 1;
+      } 
+
+      if($_SESSION['is_try_to_update'] == '1' && $needto_reinput == 0){
         house_update($_SESSION['try_to_change_house_id'], $_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);  
         information_delete_by_house_id($_SESSION['try_to_change_house_id']);
-      }
-      else{
-        $_SESSION['try_to_change_house_id'] = house_create($_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);  
-      }
-      for($i = 1;$i <= 10;$i++){
-        if(isset($_POST[$i])){
-          information_create($_SESSION['try_to_change_house_id'], $i);
+        for($i = 1;$i <= 10;$i++){
+          if(isset($_POST[$i])){
+            information_create($_SESSION['try_to_change_house_id'], $i);
+          }
         }
-      }
-      if($_SESSION['is_try_to_update'] == '1'){
         print_p_with_div("notice", "Update success", 1, "user_houses.php");
         unset_session('is_try_to_update');
       }
-      else{
+      else if($needto_reinput == 0){
+        $_SESSION['try_to_change_house_id'] = house_create($_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']); 
+        for($i = 1;$i <= 10;$i++){
+          if(isset($_POST[$i])){
+            information_create($_SESSION['try_to_change_house_id'], $i);
+          }
+        } 
         print_p_with_div("notice", "Create success", 1, "user_houses.php");
+      } 
+      else{
+        $needto_output_with_header = array();
+        if($_SESSION['is_try_to_update'] == '1'){ 
+          array_push($needto_output_with_header, "update failed");
+        }
+        else{
+          array_push($needto_output_with_header, "create failed");
+        }
+        array_push($needto_output_with_header, $needto_output);
+        print_p_with_div("alert", $needto_output_with_header, 1, "user_house_change.php");
       }
     }
   }
