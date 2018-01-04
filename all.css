@@ -110,6 +110,9 @@ input[type|="submit"]{
 input[value="logout"],[value="cancel"]{
   background-color:rgb(243,198,203);
 }
+input[name="time_check_in"],[name="time_check_out"],[name="id"]{
+  width:8em;
+}
 input.adjust{
   /*min-width:4em;*/
   margin:2px;
@@ -119,6 +122,11 @@ input.adjust{
   border:none;
   border-radius:0.2em;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+}
+input[value="BOOK"]{
+  background-color:rgba(110,130,255,0.87);
+  font-size:14pt;
+  //color:white;
 }
 input.search{
   width: calc(100% - 7px);
@@ -184,11 +192,10 @@ div#personinfo{
 }
 div#table,#usertable{
   display:inline-block;
-  max-width:55em;
+  max-width:75em;
   min-width:20em;
   margin:auto;
   margin-top:1em;
-  hello world;
   border-radius:0.5em;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.5);
 }

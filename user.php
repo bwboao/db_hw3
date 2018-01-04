@@ -140,20 +140,20 @@
               <p style="text-align:end;font-size:10px;">*info:use ctrl + mouse to multi-check the information</p>
             </td>
           </tr>
-          <tr>
-            <td>id_keyword</td>
-            <td>name_keyword</td>
-            <td>price_keyword</td>
-            <td>location_keyword</td>
-            <td>time_check_in</td>
-            <td>time_check_out</td>
-            <td>owner_keyword</td>
-            <td>information_selections</td>
-          </tr>   
+          <!--tr>
+            <td>id</td>
+            <td>name</td>
+            <td>price</td>
+            <td>location</td>
+            <td>check-in</td>
+            <td>check-out</td>
+            <td>owner</td>
+            <td>information</td>
+          </tr-->   
           <tr>          
             <form method="post" action="user.php" id="searchform">
               <td class="adjust">
-                <input class="search" name="id" type="number" placeholder="interval" min="0" <?php check_post_value("id"); ?>>
+                <input name="id" type="number" placeholder="interval" min="0" <?php check_post_value("id"); ?>>
               </td>
               <td class="adjust">
                 <input class="search" name="name" type="text" placeholder="keywords"<?php check_post_value("name"); ?>>
@@ -171,10 +171,10 @@
                 <input class="search" name="location" type="text" placeholder="keywords"<?php check_post_value("location"); ?>>
               </td>
               <td class="adjust">
-                <input class="search" name="time_check_in" type="date" placeholder="date"<?php check_post_value("time_check_in"); ?>>
+                <input  name="time_check_in" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="check-in" <?php check_post_value("time_check_in"); ?>>
               </td>
               <td class="adjust">
-                <input class="search" name="time_check_out" type="date" placeholder="date"<?php check_post_value("time_check_out"); ?>>
+                <input  name="time_check_out" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="check-out" <?php check_post_value("time_check_out"); ?>>
               </td>
 
               <td class="adjust">
@@ -225,7 +225,7 @@
                   <polygon points="5,0 0,10 10,10" style="fill:rgba(50,0,255,0.5)" />
                 </svg>
               </button>
-              time
+              upload time
               <button type="submit" form="searchform" class="svgbutton" name="time_search" value="DESC">
                 <svg height="10" width="10">
                   <polygon points="0,0 5,10 10,0" style="fill:rgba(50,0,255,0.5)" />
@@ -252,7 +252,7 @@
             <td><?php echo $table->name; ?></td>
             <td><?php echo $table->price; ?></td>
             <td><?php echo $table->location; ?></td>
-            <td colspan='2'><?php echo $table->time; ?></td>
+            <td colspan="2"><?php echo $table->time; ?></td>
             <td><?php echo $table->owner; ?></td>
             <td>
 <?php
@@ -273,17 +273,18 @@
             if($_SESSION['in_use_is_admin'] == 1){
               button_with_form("user.php", "delete_house_by_button", $table->id, "delete"); 
             }
+            echo "<br>";
             if($table->owner_id == $_SESSION['in_use_id']){
-              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "my_house");
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "Your house");
             }
             else if(isset($_SESSION['time_check_out']) && isset($_SESSION['time_check_in'])){
               button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
             }
             else if(isset($_SESSION['time_check_in'])){
-              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "set_time_check_out");
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "please set check-out");
             }
             else{
-              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "set_time_check_in");
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "please set check-in");
             }
 ?>  
             </td>
@@ -295,7 +296,7 @@
       </table>
 <?php
       if($has_house == 0){
-        print_p("notice", "check_in_time must smaller than chekc_out_time");
+        print_p("notice", "check_in_time must smaller than check_out_time");
       }
 ?>
     </div>

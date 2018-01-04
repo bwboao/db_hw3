@@ -265,14 +265,14 @@
   function button_with_form($post_to, $name, $value, $button_name){
     echo "<form method='post' action=$post_to>";
     echo "<input type='hidden' name=$name value='$value'>";
-    echo "<input class='adjust' value=$button_name type='submit'>";
+    echo "<input class='adjust' value='$button_name' type='submit'>";
     echo "</form>";
   }
   
   function button_with_form_disabled($post_to, $name, $value, $button_name){
     echo "<form method='post' action=$post_to>";
     echo "<input type='hidden' name=$name value='$value' disabled>";
-    echo "<input class='adjust' value=$button_name type='submit' disabled>";
+    echo "<input class='adjust' value='$button_name' type='submit' disabled>";
     echo "</form>";
   }
 

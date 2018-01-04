@@ -34,7 +34,7 @@
       <table>
         <h3>Your houses</h3>
         <tr>
-          <td class="adjust" colspan="7"></td>
+          <td class="adjust" colspan="8"></td>
           <td class="adjust">
             <input type="submit" onclick="location.href='user_house_change.php'" value="新增"></input>
           </td>
