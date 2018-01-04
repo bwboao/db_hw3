@@ -280,10 +280,10 @@
               button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
             }
             else if(isset($_SESSION['time_check_in'])){
-              button_with_form("user.php", "book_house_by_button", $table->id, "set_time_check_out");
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "set_time_check_out");
             }
             else{
-              button_with_form("user.php", "book_house_by_button", $table->id, "set_time_check_in");
+              button_with_form_disabled("user.php", "book_house_by_button", $table->id, "set_time_check_in");
             }
 ?>  
             </td>
