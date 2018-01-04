@@ -112,6 +112,7 @@
     else{
       $house_rs = house_show("1", $require_order, array());
     }
+    $now = date('Y-m-d');
 ?>
 <!-- Table part START-->
     <div id="welcome">
@@ -176,7 +177,6 @@
               <td class="adjust">
                 <input  name="time_check_out" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="check-out" <?php check_post_value("time_check_out"); ?>>
               </td>
-
               <td class="adjust">
                 <input class="search" name="owner" type="text" placeholder="keywords"<?php check_post_value("owner"); ?>>
               </td>
@@ -278,7 +278,12 @@
               button_with_form_disabled("user.php", "book_house_by_button", $table->id, "Your house");
             }
             else if(isset($_SESSION['time_check_out']) && isset($_SESSION['time_check_in'])){
-              button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
+              if($_SESSION['time_check_out'] >= $now){
+                button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
+              }
+              else{
+                button_with_form_disabled("user.php", "book_house_by_button", $table->id, "check-in should be bigger than today");
+              }
             }
             else if(isset($_SESSION['time_check_in'])){
               button_with_form_disabled("user.php", "book_house_by_button", $table->id, "please set check-out");

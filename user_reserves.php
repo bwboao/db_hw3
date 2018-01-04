@@ -4,17 +4,19 @@
   include("connect_database.php");
   include("_form.php");
   include("_personinfo.php");
+  unset_session('try_to_change_reserve_id');
   
   if(check_is_admin() == -1){
     print_p_with_div("alert", "Please login.", 2, "user.php");
   }
   else{
     //delete part start
-    if(isset($_POST['edit_order_by_button'])){//delete part start
-      print_p_with_div("notice", "update success", 1, "user_reserves.php");
+    if(isset($_POST['delete_reserve_by_button'])){//delete part start
+      reserve_delete($_POST['delete_reserve_by_button']);
+      print_p_with_div("notice", "Delete success", 1, "user_reserves.php");
     }
 
-    $require = "h.id IN (". str_house_select_by('order') . ")";
+    $require = "h.id IN (". str_house_select_by('customer') . ")";
     $require_order = "ORDER BY h.id ASC";
     $house_rs = reserve_show($require, $require_order, array('customer_id' => $_SESSION['in_use_id']));
 ?>
@@ -63,11 +65,11 @@
           while($info = $info_rs->fetchObject()){
             echo "<p> $info->information </p>" ;
           }
-
 ?>
           </td>
           <td class="adjust">
-            <?php button_with_form_disabled("user_reserves.php", "edit_order_by_button", $table->id, "edit"); ?>
+            <?php button_with_form("user_reserve_change.php", "edit_reserve_by_button", $table->reserve_id, "edit"); ?>
+            <?php button_with_form("user_reserves.php", "delete_reserve_by_button", $table->reserve_id, "delete"); ?>
           </td>
         </tr>
 <?php
