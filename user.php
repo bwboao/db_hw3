@@ -293,7 +293,7 @@
               button_with_form_disabled("user.php", "book_house_by_button", $table->id, "Your house");
             }
             else if(isset($_SESSION['time_check_out']) && isset($_SESSION['time_check_in'])){
-              if($_SESSION['time_check_out'] >= $now){
+              if($_SESSION['time_check_in'] >= $now){
                 button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
               }
               else{

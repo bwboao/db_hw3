@@ -142,6 +142,13 @@
     $rs->execute(array('time_check_in' => $time_check_in, 'time_check_out' => $time_check_out));
   }
 
+  function reserve_delete($reserve_id){
+    include("connect_database.php");
+    $sql = "DELETE FROM people_house_reserve WHERE id = $reserve_id";
+    //echo $sql;
+    $db->query($sql);
+  }
+
 //information's action
 
   function information_show($house_id){
