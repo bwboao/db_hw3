@@ -27,7 +27,7 @@
       store_post_as_session('try_to_change_house_location', 'location');
       if($_SESSION['is_try_to_update'] == '1'){
         house_update($_SESSION['try_to_change_house_id'], $_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);  
-        information_delete($_SESSION['try_to_change_house_id']);
+        information_delete_by_house_id($_SESSION['try_to_change_house_id']);
       }
       else{
         $_SESSION['try_to_change_house_id'] = house_create($_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);  

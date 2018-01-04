@@ -20,7 +20,7 @@
       print_p_with_div("notice", "Delete success", 1, "user_houses.php");
     }
     $require = "h.id IN (" . str_house_select_by("owner") . ")"; 
-    $house_rs = order_show($require, "", array('owner' => $_SESSION['in_use_name']));
+    $house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
 ?>
     <div id="welcome">
       <h1>Welcome to your house manage page!</h1>

@@ -17,13 +17,13 @@
 
     //favorite part
     if(isset($_POST['favorite_house_by_button'])){
-      house_favorite($_SESSION['in_use_id'], $_POST['favorite_house_by_button']);
+      favorite_create($_SESSION['in_use_id'], $_POST['favorite_house_by_button']);
       print_p_with_div("notice", "Favorited <3", 1, "user.php");
     }
 
     //book part
     if(isset($_POST['book_house_by_button'])){
-      house_book($_SESSION['in_use_id'], $_POST['book_house_by_button'], $_SESSION['time_check_in'], $_SESSION['time_check_out']);
+      reserve_create($_SESSION['in_use_id'], $_POST['book_house_by_button'], $_SESSION['time_check_in'], $_SESSION['time_check_out']);
       print_p_with_div("notice", "Book success!", 1, "user.php");
     }
 
@@ -120,7 +120,7 @@
         <p class="margin">
           <input type="submit" onclick="location.href='user_favorites.php'" value="我的最愛"></input>
           <input type="submit" onclick="location.href='user_houses.php'" value="我的房屋"></input>
-          <input type="submit" onclick="location.href='user_orders.php'" value="我的訂房"></input>
+          <input type="submit" onclick="location.href='user_reserves.php'" value="我的訂房"></input>
 <?php
           if($_SESSION['in_use_is_admin'] == 1){
 ?>

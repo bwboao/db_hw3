@@ -58,25 +58,14 @@
     $rs->execute($array_for_execute);
     return $rs;
   }
-  
-  function order_show($require, $require_order, $array_for_execute){
-    include("connect_database.php");
-    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner, p.id owner_id, time_check_in, time_check_out, p_h_reserve.people_id customer_id FROM house AS h LEFT JOIN people_house_has AS p_h_has ON h.id = p_h_has.house_id LEFT JOIN people AS p ON p_h_has.people_id = p.id LEFT JOIN house_location_has AS h_l_has ON h.id = h_l_has.house_id LEFT JOIN normal_location AS l ON h_l_has.location_id = l.id LEFT JOIN people_house_reserve AS p_h_reserve ON h.id = p_h_reserve.house_id WHERE " . $require . " " . $require_order;
-    //echo $sql;
-    $rs = $db->prepare($sql);
-    $rs->execute($array_for_execute);
-    return $rs;
-  }
-  function house_favorite($people_id, $house_id){
-    include("connect_database.php");
-    $sql = "INSERT INTO people_house_favorite (people_id, house_id) VALUES ($people_id, $house_id)";
-    $db->query($sql); 
-  }
 
   function house_delete($house_id){
     include("connect_database.php");
     $sql = "DELETE FROM people_house_has WHERE house_id = $house_id;
+            DELETE FROM people_house_favorite WHERE house_id = $house_id;
+            DELETE FROM people_house_reserve WHERE house_id = $house_id;
             DELETE FROM house_information_has WHERE house_id = $house_id;
+            DELETE FROM house_location_has WHERE house_id = $house_id;
             DELETE FROM house WHERE id = $house_id";
     $db->query($sql);
   }
@@ -107,13 +96,6 @@
     return $house_id;
   }
 
-  function house_book($people_id, $house_id, $time_check_in, $time_check_out){
-    include("connect_database.php");
-    $sql = "INSERT INTO people_house_reserve (people_id, house_id, time_check_in, time_check_out) VALUES ($people_id, $house_id, :time_check_in, :time_check_out)";
-    $rs = $db->prepare($sql);
-    $rs->execute(array('time_check_in' => $time_check_in, 'time_check_out' => $time_check_out));
-  }
-
   function str_house_select_by($condition){
     switch($condition){
       case 'id':
@@ -134,6 +116,24 @@
         return "SELECT house_id id FROM house_information_has WHERE information_id IN $condition";
     }  
   }
+  
+//reserve's action
+
+  function reserve_show($require, $require_order, $array_for_execute){
+    include("connect_database.php");
+    $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner, p.id owner_id, time_check_in, time_check_out, p_h_reserve.people_id customer_id FROM house AS h LEFT JOIN people_house_has AS p_h_has ON h.id = p_h_has.house_id LEFT JOIN people AS p ON p_h_has.people_id = p.id LEFT JOIN house_location_has AS h_l_has ON h.id = h_l_has.house_id LEFT JOIN normal_location AS l ON h_l_has.location_id = l.id LEFT JOIN people_house_reserve AS p_h_reserve ON h.id = p_h_reserve.house_id WHERE " . $require . " " . $require_order;
+    //echo $sql;
+    $rs = $db->prepare($sql);
+    $rs->execute($array_for_execute);
+    return $rs;
+  }
+
+  function reserve_create($people_id, $house_id, $time_check_in, $time_check_out){
+    include("connect_database.php");
+    $sql = "INSERT INTO people_house_reserve (people_id, house_id, time_check_in, time_check_out) VALUES ($people_id, $house_id, :time_check_in, :time_check_out)";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('time_check_in' => $time_check_in, 'time_check_out' => $time_check_out));
+  }
 
 //information's action
 
@@ -151,7 +151,7 @@
     return $rs;
   }
 
-  function information_delete($house_id){
+  function information_delete_by_house_id($house_id){
     include("connect_database.php");
     $sql = "DELETE FROM house_information_has WHERE house_id = $house_id";
     $db->query($sql);
@@ -186,6 +186,12 @@
     $sql = "SELECT * FROM people_house_favorite WHERE people_id = $people_id AND house_id = $house_id";
     $rs = $db->query($sql);
     return $rs;
+  }
+  
+  function favorite_create($people_id, $house_id){
+    include("connect_database.php");
+    $sql = "INSERT INTO people_house_favorite (people_id, house_id) VALUES ($people_id, $house_id)";
+    $db->query($sql); 
   }
 
   function favorite_delete($people_id, $house_id){
@@ -235,6 +241,8 @@
             DELETE FROM house_information_has WHERE house_id IN (SELECT house_id FROM people_house_has WHERE people_id = $id);
             DELETE FROM house WHERE id IN (SELECT house_id id FROM people_house_has WHERE people_id = $id);
             DELETE FROM people_house_favorite WHERE people_id = $id;
+            DELETE FROM people_house_reserve WHERE people_id = $id;
+            DELETE FROM people_house_reserve WHERE house_id IN (SELECT house_id FROM people_house_reserve WHERE people_id = $id);
             DELETE FROM people_house_has WHERE people_id = $id";
     $db->query($sql); 
   }
