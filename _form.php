@@ -53,7 +53,7 @@
   function house_show($require, $require_order, $array_for_execute){
     include("connect_database.php");
     $sql = "SELECT h.id id, h.name name, price, location, time, p.name owner, p.id owner_id FROM house AS h LEFT JOIN people_house_has AS p_h_has ON h.id = p_h_has.house_id LEFT JOIN people AS p ON p_h_has.people_id = p.id LEFT JOIN house_location_has AS h_l_has ON h.id = h_l_has.house_id LEFT JOIN normal_location AS l ON h_l_has.location_id = l.id WHERE " . $require . " " . $require_order;
-    echo $sql;
+    //echo $sql;
     $rs = $db->prepare($sql);
     $rs->execute($array_for_execute);
     return $rs;
