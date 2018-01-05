@@ -58,7 +58,7 @@
           <td><?php echo $table->id; ?></td>
           <td><?php echo $table->name; ?></td>
           <td><?php echo $table->price; ?></td>
-          <td><?php echo $table->location; ?></td>
+          <td><?php if($table->location != NULL){echo $table->location;}else{echo "未知";} ?></td>
           <td><?php echo $table->time_check_in; ?></td>
           <td><?php echo $table->time_check_out; ?></td>
           <td><?php echo $table->owner; ?></td>

@@ -77,7 +77,7 @@
           <td><?php echo $table->id; ?></td>
           <td><?php echo $table->name; ?></td>
           <td><?php echo $table->price; ?></td>
-          <td><?php echo $table->location; ?></td>
+          <td><?php if($table->location != NULL){echo $table->location;}else{echo "未知";} ?></td>
           <td>
             <input  name="time_check_in" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="check-in" <?php check_post_value("time_check_in"); ?>>
           </td>

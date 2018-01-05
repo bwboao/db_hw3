@@ -21,12 +21,13 @@
       print_p_with_div("notice", "Delete success", 1, "user_houses.php");
     }
     $require = "h.id IN (" . str_house_select_by("owner") . ")";
+    $require_order = "ORDER BY h.id ASC";
     //echo $require . "<br>";
     //$house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
     //for($i=0;$i<$house_rs->rowCount();$i++)
     //  print_r($house_rs->fetchObject());
     //$house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
-    $house_rs = house_show($require, "", array('owner' => $_SESSION['in_use_name']));
+    $house_rs = house_show($require, $require_order, array('owner' => $_SESSION['in_use_name']));
 ?>
     <div id="welcome">
       <h1>Welcome to your house manage page!</h1>
@@ -65,7 +66,8 @@
 <?php
         }
         $require = "h.id IN (" . $table->id . ")";
-        $reserve_rs = reserve_show($require,"order by time_check_in asc",array()); 
+        $require_order = "ORDER BY time_check_in  ASC";
+        $reserve_rs = reserve_show($require, $require_order, array()); 
         $rows =  $reserve_rs->rowCount();
         $table = $reserve_rs->fetchObject();
         if($rows<1)
@@ -75,7 +77,7 @@
           <td><?php echo $table->id; ?></td>
           <td><?php echo $table->name; ?></td>
           <td><?php echo $table->price; ?></td>
-          <td><?php echo $table->location; ?></td>
+          <td><?php if($table->location != NULL){echo $table->location;}else{echo "未知";} ?></td>
           <td><?php echo $table->time_check_in; ?></td>
           <td><?php echo $table->time_check_out; ?></td>
           <td>
@@ -108,7 +110,16 @@
           <td rowspan=<?php echo "'$rows'> $table->id"; ?></td>
           <td rowspan=<?php echo "'$rows'>$table->name"; ?></td>
           <td rowspan=<?php echo "'$rows'> $table->price"; ?></td>
+<?php
+          if($table->location != NULL){
+?>
           <td rowspan=<?php echo "'$rows'> $table->location"; ?></td>
+<?php
+          }
+          else{
+            echo "<td>未知</td>";
+          }
+  ?>
           <td><?php echo $table->time_check_in; ?></td>
           <td><?php echo $table->time_check_out; ?></td>
           <td>

@@ -72,7 +72,8 @@
 
   function house_update($house_id, $house_name, $house_price, $location_id){
     include("connect_database.php");
-    $sql = "UPDATE house_location_has SET location_id = $location_id WHERE house_id = $house_id;
+    $sql = "DELETE FROM house_location_has WHERE house_id = $house_id;
+            INSERT INTO house_location_has (house_id, location_id) VALUES ($house_id, $location_id);
             UPDATE house SET name = :house_name, price = :house_price WHERE id = $house_id";
     $rs = $db->prepare($sql); 
     $rs->execute(array('house_name' => $house_name, 'house_price' => $house_price));
@@ -105,7 +106,7 @@
       case 'time':
         return "SELECT house_id id FROM people_house_reserve WHERE (:time_check_in <= time_check_in AND time_check_in < :time_check_out) OR (:time_check_in < time_check_out AND time_check_out <= :time_check_out) OR (time_check_in <= :time_check_in AND :time_check_out <= time_check_out)";
       case 'location':
-        return "SELECT house_id id FROM house_location_has AS h_l_has LEFT JOIN normal_location AS l ON h_l_has.location_id = l.id WHERE location = :location";
+        return "SELECT house_id id FROM house_location_has AS h_l_has WHERE location_id = :location_id";
       case 'owner_exclusive':
         return "SELECT house_id id FROM people_house_has AS p_h_has LEFT JOIN people AS p ON p_h_has.people_id = p.id where p.name LIKE :owner";
       case 'owner':
@@ -167,13 +168,27 @@
     return $rs;
   }
 
+  function information_create($information){
+    include("connect_database.php");
+    $sql = "INSERT INTO normal_information (id, information) VALUES (NULL, :information)";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('information' => $information));
+  }
+
+  function information_delete($id){
+    include("connect_database.php");
+    $sql = "DELETE FROM house_information_has WHERE information_id = $id;
+            DELETE FROM normal_information WHERE id = $id";
+    $db->query($sql);
+  }
+
   function information_delete_by_house_id($house_id){
     include("connect_database.php");
     $sql = "DELETE FROM house_information_has WHERE house_id = $house_id";
     $db->query($sql);
   }
 
-  function information_create($house_id, $information_id){
+  function information_create_with_house_id($house_id, $information_id){
     include("connect_database.php");
     $sql = "INSERT INTO house_information_has (house_id, information_id) VALUES ($house_id, $information_id);";
     $db->query($sql);
@@ -186,6 +201,20 @@
     $sql = "SELECT * FROM house_location_has WHERE house_id = $house_id";
     $rs = $db->query($sql);
     return $rs;
+  }
+
+  function location_create($location){
+    include("connect_database.php");
+    $sql = "INSERT INTO normal_location (id, location) VALUES (NULL, :location)";
+    $rs = $db->prepare($sql);
+    $rs->execute(array('location' => $location));
+  }
+
+  function location_delete($id){
+    include("connect_database.php");
+    $sql = "DELETE FROM house_location_has WHERE location_id = $id;
+            DELETE FROM normal_location WHERE id = $id";
+    $db->query($sql);
   }
 
   function location_show_all(){
@@ -351,13 +380,19 @@
     if(isset($_SESSION['try_to_change_house_id'])){
       $house_location_rs = location_show($_SESSION['try_to_change_house_id']);
       $table_house_location = $house_location_rs->fetchObject();
-      $house_location_id = $table_house_location->location_id;
+      if($table_house_location != array()){
+        $house_location_id = $table_house_location->location_id;
+      }
     }
     $rs = location_show_all();
     echo "<select class = 'search' name = 'location' placeholder = 'keywords'>";
+      echo "<option value='0'>-none-</option>";
     while($table = $rs->fetchObject()){
       echo "<option value=$table->id";
       if(isset($house_location_id) && $house_location_id == $table->id){
+        echo " selected = 'true'";
+      }
+      if(isset($_POST['location']) && $_POST['location'] == $table->id){
         echo " selected = 'true'";
       }
       echo ">$table->location</option>";

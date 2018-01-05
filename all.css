@@ -73,7 +73,7 @@ table{
   margin:0.5em 0em;
 }
 td {
-  padding:1px;
+  padding: 0 5px;
   margin:2px;
   border-radius:2px;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
@@ -88,9 +88,11 @@ td.adjust{
   box-shadow:none;
 }
 th {
-  min-width:5em;
+  padding: 0 5px;
+  min-width: 2em;
   background-color:rgba(53,153,220,0.3);
   box-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+  border-collapse:none;
 }
 form>table>tr>td{
   box-shadow: none;
