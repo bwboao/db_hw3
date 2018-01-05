@@ -20,8 +20,13 @@
       house_delete($_POST['delete_house_by_button']);
       print_p_with_div("notice", "Delete success", 1, "user_houses.php");
     }
-    $require = "h.id IN (" . str_house_select_by("owner") . ")"; 
-    $house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
+    $require = "h.id IN (" . str_house_select_by("owner") . ")";
+    //echo $require . "<br>";
+    //$house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
+    //for($i=0;$i<$house_rs->rowCount();$i++)
+    //  print_r($house_rs->fetchObject());
+    //$house_rs = reserve_show($require, "", array('owner' => $_SESSION['in_use_name']));
+    $house_rs = house_show($require, "", array('owner' => $_SESSION['in_use_name']));
 ?>
     <div id="welcome">
       <h1>Welcome to your house manage page!</h1>
@@ -51,14 +56,20 @@
           <th>name</th>
           <th>price</th>
           <th>location</th>
-          <th>time_check_in</th>
-          <th>time_check_out</th>
+          <th>check-in time</th>
+          <th>check-out time</th>
           <th>visitor</th>
           <th>information</th>
           <th>option</th>
         </tr>
 <?php
         }
+        $require = "h.id IN (" . $table->id . ")";
+        $reserve_rs = reserve_show($require,"",array()); 
+        $rows =  $reserve_rs->rowCount();
+        $table = $reserve_rs->fetchObject();
+        if($rows<1)
+        {
 ?>  
         <tr>
           <td><?php echo $table->id; ?></td>
@@ -89,6 +100,60 @@
           </td>
         </tr>
 <?php
+        }
+        else
+        {
+?>
+        <tr>
+          <td rowspan=<?php echo "'$rows'> $table->id"; ?></td>
+          <td rowspan=<?php echo "'$rows'>$table->name"; ?></td>
+          <td rowspan=<?php echo "'$rows'> $table->price"; ?></td>
+          <td rowspan=<?php echo "'$rows'> $table->location"; ?></td>
+          <td><?php echo $table->time_check_in; ?></td>
+          <td><?php echo $table->time_check_out; ?></td>
+          <td>
+<?php
+          if($table->customer_id != ""){
+            $customer = account_show_by_id($table->customer_id);
+            echo $customer['name'];
+          }
+?>
+          </td>
+          <td rowspan=<?php echo "'$rows'";?> >
+<?php
+          $info_rs = information_show($table->id);
+          while($info = $info_rs->fetchObject()){
+            echo "<p> $info->information </p>" ;
+          }
+?>
+          </td>
+          <td class="adjust" rowspan=<?php echo "'$rows'";?> >
+            <?php button_with_form("user_houses.php", "delete_house_by_button", $table->id, "delete"); ?>
+            <?php button_with_form("user_house_change.php", "change_house_by_button", $table->id, "change"); ?>
+          </td>
+        </tr>
+
+<?php
+          for($i=1;$i<$rows;$i++)
+          {
+          $table = $reserve_rs->fetchObject();
+?>
+        <tr>
+          <td><?php echo $table->time_check_in; ?></td>
+          <td><?php echo $table->time_check_out; ?></td>
+          <td>
+<?php
+          if($table->customer_id != ""){
+            $customer = account_show_by_id($table->customer_id);
+            echo $customer['name'];
+          }
+?>
+          </td>
+        </tr>
+<?php
+          }
+        }
+        
         }
         if($has_house == 0){
           print_p("notice", "您尚未擁有任何房子");

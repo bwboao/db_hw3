@@ -101,11 +101,13 @@
       case 'id':
         return "SELECT id FROM house WHERE id = :id";
       case 'name':
-        return "SELECT id FROM house WHERE name = :name";
+        return "SELECT id FROM house WHERE name LIKE :name ";
       case 'time':
         return "SELECT house_id id FROM people_house_reserve WHERE (:time_check_in <= time_check_in AND time_check_in < :time_check_out) OR (:time_check_in < time_check_out AND time_check_out <= :time_check_out) OR (time_check_in <= :time_check_in AND :time_check_out <= time_check_out)";
       case 'location':
         return "SELECT house_id id FROM house_location_has AS h_l_has LEFT JOIN normal_location AS l ON h_l_has.location_id = l.id WHERE location = :location";
+      case 'owner_exclusive':
+        return "SELECT house_id id FROM people_house_has AS p_h_has LEFT JOIN people AS p ON p_h_has.people_id = p.id where p.name LIKE :owner";
       case 'owner':
         return "SELECT house_id id FROM people_house_has AS p_h_has LEFT JOIN people AS p ON p_h_has.people_id = p.id where p.name = :owner";
       case 'favorite':
@@ -370,13 +372,16 @@
       $page_num = $_POST['page_num'];
     else
       $page_num = 1;
+    if($rows>1)
+    {
     echo "<button type='submit' form='searchform' class='page' name='page_num' value=" . prev_page($page_num) . ">prev</button> ";
     for($i=1;$i<=$rows;$i++)
       if($i == $page_num)
-        echo "<button type='submit' form='searchform' class='page active' name='page_num' value='$i'> $i </button>";
+        echo "<button disabled type='submit' form='searchform' class='page active' name='page_num' value='$i'> $i </button>";
       else
         echo "<button type='submit' form='searchform' class='page' name='page_num' value='$i'> $i </button>";
     echo "<button type='submit' form='searchform' class='page' name='page_num' value=" . next_page($page_num,$rows) . ">next</button> ";
+    }
     return $page_num;
   }
     function prev_page($page_num){

@@ -25,10 +25,25 @@
   font-family: 'Noto Sans TC','Arimo', sans-serif;
   font-weight: 300;
 }
+@keyframes colorflow{
+  0%    { background-color:rgba(255,183,183,0.27);/transform:rotate3d(1,0,0,90deg); }
+  14.2% { background-color:rgba(255,183,255,0.27); }
+  28.5% { background-color:rgba(183,183,255,0.27); }
+  42.9% { background-color:rgba(183,183,255,0.27);/transform:rotate3d(5,0,7,-200deg)}
+  57.2% { background-color:rgba(183,255,255,0.27); }
+  71.4% { background-color:rgba(183,255,183,0.27); }
+  85.7% { background-color:rgba(255,255,183,0.27); }
+  100%  { background-color:rgba(255,183,183,0.27);/transform:rotate3d(1,0,0,-270deg); }
+}
 body{
   text-align:center;
-  background-color:rgba(33,33,33,0.1);
-  margin:0px
+  margin:0px;
+  background-color:rgba(177,133,133,0.1);
+  animation-name:colorflow;
+  animation-iteration-count:infinite;
+  animation-duration:5s;
+  //animation-direction:alternate;
+  animation-timing-function:ease-in-out;
 }
 /*p for alert and notice*/
 td>p , form p{
@@ -184,7 +199,7 @@ div {
   padding:1em;
   background-color:rgba(53,153,220,0.3);
 }
-h1{
+h1,h3{
   margin:0.3em;
 }
 div#welcome {
@@ -201,17 +216,21 @@ div#personinfo{
   border-radius:0.5em;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.5);
 }
-div#table,#usertable{
+div#table,#usertable,#edittable{
   display:inline-block;
   max-width:75em;
   min-width:20em;
   margin:auto;
+  margin-bottom:2em;
   margin-top:1em;
   border-radius:0.5em;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.5);
 }
 div#usertable{
   max-width:35em;
+}
+div#edittable{
+  margin-top:3em;
 }
 div#index {
   position:fixed;

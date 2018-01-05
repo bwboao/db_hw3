@@ -30,13 +30,14 @@
     //search part start
     $require = "";
     $array_for_execute = array();
+    $is_check_time_wrong=0;
     if(!empty($_POST['id'])){
       $require .= " AND h.id IN (" . str_house_select_by('id') . ")";
       $array_for_execute['id'] = $_POST['id'];
     }
     if(!empty($_POST['name'])){
       $require .= " AND h.id IN (" . str_house_select_by('name') . ")";
-      $array_for_execute['name'] = $_POST['name'];
+      $array_for_execute['name'] = "%" . $_POST['name'] . "%";
     }
     if(!empty($_POST['location'])){
       $require .= " AND h.id IN (" . str_house_select_by('location') . ")";
@@ -47,6 +48,7 @@
       store_post_as_session('time_check_out', 'time_check_out');
       if($_SESSION['time_check_in'] >= $_SESSION['time_check_out']){
         $require .= " AND 0 = 1";
+        $is_check_time_wrong=1;
       }
       else{
         $require .= " AND h.id NOT IN (" . str_house_select_by('time') . ")";
@@ -67,8 +69,8 @@
       unset_session('time_check_in');
     }
     if(!empty($_POST['owner'])){
-      $require .= " AND h.id IN (" . str_house_select_by('owner') . ")";
-      $array_for_execute['owner'] = $_POST['owner'];
+      $require .= " AND h.id IN (" . str_house_select_by('owner_exclusive') . ")";
+      $array_for_execute['owner'] = "%" . $_POST['owner'] . "%";
     }
     if(isset($_POST['information']) && $_POST['information'][0] != 11){
       $infos = "";
@@ -194,7 +196,7 @@
               <td class="adjust">
                 <div id="infoselect" >
                   <select class="search" name="information[]" multiple="multiple">
-                    <option value='11' ", check_post_multiselect('information','11') ,">-none-</option>;
+                  <option value='11' <?php echo check_post_multiselect('information','11') ?> >-none-</option>;
 <?php     
                     $info_rs = information_show_all();
                     while($info_table = $info_rs->fetchObject()){
@@ -293,7 +295,7 @@
               button_with_form_disabled("user.php", "book_house_by_button", $table->id, "Your house");
             }
             else if(isset($_SESSION['time_check_out']) && isset($_SESSION['time_check_in'])){
-              if($_SESSION['time_check_in'] >= $now){
+              if($_SESSION['time_check_in'] > $now){
                 button_with_form("user.php", "book_house_by_button", $table->id, "BOOK");
               }
               else{
@@ -314,11 +316,17 @@
 ?>
         </tbody>
       </table>
+    <div class="page nobackground">
 <?php
-      if($has_house == 0){
-        print_p("notice", "check_in_time must smaller than check_out_time");
+          if($has_house == 0){
+            if($is_check_time_wrong)
+              print_p("alert", "Check-in time must be smaller than check-out time");
+            else
+              print_p("notice", "No house found.");
       }
+    print_pagination($rows);
 ?>
+    </div>
     </div>
 <!-- Table part END -->
 <?php
