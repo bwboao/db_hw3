@@ -38,10 +38,10 @@
     if(!empty($_POST['name'])){
       $require .= " AND h.id IN (" . str_house_select_by('name') . ")";
       $array_for_execute['name'] = "%" . $_POST['name'] . "%";
-    }
+    } 
     if(!empty($_POST['location'])){
       $require .= " AND h.id IN (" . str_house_select_by('location') . ")";
-      $array_for_execute['location'] = $_POST['location'];
+      $array_for_execute['location_id'] = $_POST['location'];
     }
     if(!empty($_POST['time_check_in']) && !empty($_POST['time_check_out'])){
       store_post_as_session('time_check_in', 'time_check_in');
@@ -72,7 +72,7 @@
       $require .= " AND h.id IN (" . str_house_select_by('owner_exclusive') . ")";
       $array_for_execute['owner'] = "%" . $_POST['owner'] . "%";
     }
-    if(isset($_POST['information']) && $_POST['information'][0] != 11){
+    if(isset($_POST['information']) && $_POST['information'][0] != 0){
       $infos = "";
       $info_count = 0;
       foreach($_POST['information'] as $info_id){
@@ -128,6 +128,8 @@
           if($_SESSION['in_use_is_admin'] == 1){
 ?>
           <input type="submit" onclick="location.href='admin_users.php'" value="會員管理"></input>
+          <input type="submit" onclick="location.href='admin_informations.php'" value="資訊管理"></input>
+          <input type="submit" onclick="location.href='admin_locations.php'" value="地點管理"></input>
 <?php
           }
 ?>
@@ -182,7 +184,9 @@
                 </select>
               </td>
               <td class="adjust">
-                <input class="search" name="location" type="text" placeholder="keywords"<?php check_post_value("location"); ?>>
+<?php
+              print_location_selection();
+?>
               </td>
               <td class="adjust">
                 <input  name="time_check_in" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="check-in" <?php check_post_value("time_check_in"); ?>>
@@ -196,7 +200,7 @@
               <td class="adjust">
                 <div id="infoselect" >
                   <select class="search" name="information[]" multiple="multiple">
-                  <option value='11' <?php echo check_post_multiselect('information','11') ?> >-none-</option>;
+                  <option value='0' <?php echo check_post_multiselect('information','0') ?> >-none-</option>;
 <?php     
                     $info_rs = information_show_all();
                     while($info_table = $info_rs->fetchObject()){
@@ -268,7 +272,7 @@
             <td><?php echo $table->id; ?></td>
             <td><?php echo $table->name; ?></td>
             <td><?php echo $table->price; ?></td>
-            <td><?php echo $table->location; ?></td>
+            <td><?php if($table->location != NULL){echo $table->location;}else{echo "未知";} ?></td>
             <td colspan="2"><?php echo $table->time; ?></td>
             <td><?php echo $table->owner; ?></td>
             <td>

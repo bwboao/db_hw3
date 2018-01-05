@@ -33,25 +33,27 @@
         array_push($needto_output, "house_name can't be null");
         $needto_reinput = 1;
       } 
-
+      
       if($_SESSION['is_try_to_update'] == '1' && $needto_reinput == 0){
-        house_update($_SESSION['try_to_change_house_id'], $_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);  
+        house_update($_SESSION['try_to_change_house_id'], $_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);
         information_delete_by_house_id($_SESSION['try_to_change_house_id']);
-        for($i = 1;$i <= 10;$i++){
-          if(isset($_POST[$i])){
-            information_create($_SESSION['try_to_change_house_id'], $i);
-          }
+        $info_rs = information_show_all();
+        while($table = $info_rs->fetchObject()){
+          if(isset($_POST[$table->id])){
+            information_create_with_house_id($_SESSION['try_to_change_house_id'], $table->id);
+          } 
         }
         print_p_with_div("notice", "Update success", 1, "user_houses.php");
         unset_session('is_try_to_update');
       }
       else if($needto_reinput == 0){
-        $_SESSION['try_to_change_house_id'] = house_create($_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']); 
-        for($i = 1;$i <= 10;$i++){
-          if(isset($_POST[$i])){
-            information_create($_SESSION['try_to_change_house_id'], $i);
-          }
-        } 
+        $_SESSION['try_to_change_house_id'] = house_create($_SESSION['try_to_change_house_name'], $_SESSION['try_to_change_house_price'], $_SESSION['try_to_change_house_location']);
+        $info_rs = information_show_all();
+        while($table = $info_rs->fetchObject()){
+          if(isset($_POST[$table->id])){
+            information_create_with_house_id($_SESSION['try_to_change_house_id'], $table->id);
+          } 
+        }
         print_p_with_div("notice", "Create success", 1, "user_houses.php");
       } 
       else{
