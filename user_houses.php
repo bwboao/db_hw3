@@ -65,7 +65,7 @@
 <?php
         }
         $require = "h.id IN (" . $table->id . ")";
-        $reserve_rs = reserve_show($require,"",array()); 
+        $reserve_rs = reserve_show($require,"order by time_check_in asc",array()); 
         $rows =  $reserve_rs->rowCount();
         $table = $reserve_rs->fetchObject();
         if($rows<1)

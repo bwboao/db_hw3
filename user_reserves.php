@@ -16,8 +16,11 @@
       print_p_with_div("notice", "Delete success", 1, "user_reserves.php");
     }
 
-    $require = "h.id IN (". str_house_select_by('customer') . ")";
+    $require = "p_h_reserve.people_id = :customer_id";
     $require_order = "ORDER BY h.id ASC";
+    //$house_rs = reserve_show($require, $require_order, array('customer_id' => $_SESSION['in_use_id']));
+    //for($i=0;$i<$house_rs->rowCount();$i++)
+    //print_r($house_rs->fetchObject());
     $house_rs = reserve_show($require, $require_order, array('customer_id' => $_SESSION['in_use_id']));
 ?>
     <div id="welcome">
