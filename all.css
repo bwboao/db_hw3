@@ -110,6 +110,11 @@ input[type="text"],[type="password"],[type="number"],[type="date"],select{
   border-radius:0.2em;
   height: 1.8em;
 }
+input[type="checkbox"]{
+  width:2em;
+  height:2em;
+  border-radius:1em;
+}
 input[type="button"]{
   min-width:4em;
   padding:0.8em;

@@ -117,7 +117,7 @@
 <?php
           }
           else{
-            echo "<td>未知</td>";
+            echo "<td rowspan='$rows'>未知</td>";
           }
   ?>
           <td><?php echo $table->time_check_in; ?></td>

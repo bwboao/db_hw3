@@ -16,7 +16,7 @@
     $rs = reserve_show($require, "", array('reserve_id' => $_SESSION['try_to_change_reserve_id']));
     $table = $rs->fetchObject();
     $house_require = "h.id = $table->id AND p_h_reserve.id <> $_SESSION[try_to_change_reserve_id]";
-    $house_rs = reserve_show($house_require, "", array());
+    $house_rs = reserve_show($house_require, "ORDER BY time_check_in ASC", array());
     if(isset($_POST['try_to_update_reserve'])){
       if($_POST['time_check_in'] != "" && $_POST['time_check_out'] != ""){
         $needto_reinput = 1;
@@ -32,7 +32,7 @@
           //print_r($check_reserve_rs);
           //echo $check_reserve_rs->rowCount();
           if($check_reserve_rs->rowCount() == 0){
-            print_p_with_div("alert", "There is a visitor in this time interval, change another time", 2, "user_reserve_change.php");
+            print_p_with_div("alert", "There is a visitor in this time interval, change another time", 10, "user_reserve_change.php");
           }
           else{
             reserve_update($_SESSION['try_to_change_reserve_id'], $_POST['time_check_in'], $_POST['time_check_out']);

@@ -19,11 +19,11 @@
     $needto_reinput = 0;
 
     if($_SESSION['try_to_login_account'] == null){
-      array_push($needto_output, "account can't be null");
+      array_push($needto_output, "please enter account");
       $needto_reinput = 1;
     }
     if($password == null){
-      array_push($needto_output, "password can't be null");
+      array_push($needto_output, "please enter password");
       $needto_reinput = 1;
     }
     if($_SESSION['try_to_login_account'] != $table_who_login[0]){
@@ -37,9 +37,9 @@
      
     if($needto_reinput == 1){
       $needto_output_with_header = array();
-      array_push($needto_output_with_header, "Login failed");
+      array_push($needto_output_with_header, "==Login failed==");
       array_push($needto_output_with_header, $needto_output);
-      print_p_with_div("alert", $needto_output_with_header, 2, "index.php");
+      print_p_with_div("alert", $needto_output_with_header, 1, "index.php");
       unset($needto_output);
     }
     else{
